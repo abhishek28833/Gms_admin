@@ -1,0 +1,39 @@
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+spring:
+  datasource:
+    url: jdbc:postgresql://pg-517b35c-gms-99f3.l.aivencloud.com:21621/defaultdb?ssl=require&user=avnadmin&password=AVNS_gvPc5Y3fNojWp-aQNIs
+    username: avnadmin
+    password: AVNS_gvPc5Y3fNojWp-aQNIs
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate.ddl-auto: update
+    show-sql: true
+
+  flyway:
+    url: jdbc:postgresql://pg-517b35c-gms-99f3.l.aivencloud.com:21621/defaultdb?ssl=require&user=avnadmin&password=AVNS_gvPc5Y3fNojWp-aQNIs
+    locations: classpath:db/migration
+    baselineOnMigrate: true
+    table: gms_schema_migration
+    out-of-order: true
+    sql-migration-prefix: V
+    sql-migration-suffix: .sql
+
+
+
+logging:
+  level:
+    org:
+      springframework: INFO
+      hibernate:
+        SQL:DEBUG
+      flywaydb: DEBUG
+
+other:
+  env: dev
