@@ -27,6 +27,7 @@ spring:
 
     app:
         jwtExpirationMs: 30000
+        jwtSecret: asndsnblskjnb123253266w423tw32tw4kvn4kdg4tll4
 
 #    security:
 #        user:
@@ -43,6 +44,16 @@ logging:
         org:
             springframework: INFO
             flywaydb: DEBUG
+
+keycloak:
+    baseUrl: http://localhost:8090
+    realm: gms
+    client_id: gms_client
+    client_secret: v5j6U6Kfhwcw4gazRr0xo5oVCaf7QSB2
+    client_uuid: 1817f53d-c79d-4280-a2d1-4d4d8d764646
+    roles:
+        user: user
+        owner: owner
 
 other:
     env: local
