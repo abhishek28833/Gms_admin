@@ -2,6 +2,7 @@ package com.admin.utils;
 
 import com.admin.controller.base.BaseController;
 import com.admin.controller.base.GlobalApiResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;

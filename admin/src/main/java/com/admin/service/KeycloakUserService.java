@@ -143,7 +143,7 @@ public class KeycloakUserService {
 
         String userId = jsonNode.get(0).get("id").asText();
 
-        String roleId = getRoleIdByName(role);
+        String roleId = getRoleIdByName(role).toString();
 
         if(!assignRole(userId,roleId,role)){
             return baseController.errorResponse("Unable to assign role","error in assign role");
@@ -193,7 +193,7 @@ public class KeycloakUserService {
         }catch (JsonProcessingException e){
             throw new RuntimeException("Json Process exception.");
         }
-        return roleData.get("id").toString();
+        return roleData.get("id").asText();
 
     }
 
@@ -201,7 +201,7 @@ public class KeycloakUserService {
         String url =  keycloakBaseUrl +  "/admin/realms/" + realm + "/users/" + userId + "/role-mappings/realm";
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(getKeyclockadminToken());
-        headers.setContentType(MediaType.APPLICATION_JSON);
+//        headers.setContentType(MediaType.APPLICATION_JSON);
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("id", roleId);
         requestBody.put("name",roleName);
