@@ -2,6 +2,7 @@ package com.admin.service;
 
 import com.admin.controller.base.BaseController;
 import com.admin.controller.base.GlobalApiResponse;
+import com.admin.model.dto.SignInRequestDto;
 import com.admin.model.dto.SignUpRequestDto;
 import com.admin.utils.CustomApiCalls;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -47,6 +48,7 @@ public class KeycloakUserService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final CustomApiCalls customApiCalls;
     private BaseController baseController;
+    private GlobalApiResponse res;
 
     public KeycloakUserService(CustomApiCalls customApiCalls,BaseController baseController) {
         this.customApiCalls = customApiCalls;
@@ -127,7 +129,7 @@ public class KeycloakUserService {
 
 
     @Transactional
-    public GlobalApiResponse registerUser(SignUpRequestDto requestDto, String role) throws JsonProcessingException {
+    public JsonNode registerUser(SignUpRequestDto requestDto, String role) throws JsonProcessingException {
 
         createUser(requestDto);
 
@@ -138,18 +140,15 @@ public class KeycloakUserService {
         JsonNode jsonNode = objectMapper.readTree(jsonString);
 
         if(jsonNode.has("error")){
-            return baseController.errorResponse("error while getting userId",response.getData());
+            return jsonNode;
         }
 
         String userId = jsonNode.get(0).get("id").asText();
 
         String roleId = getRoleIdByName(role).toString();
 
-        if(!assignRole(userId,roleId,role)){
-            return baseController.errorResponse("Unable to assign role","error in assign role");
-        }
-
-        return baseController.successResponse("user register success fully",response);
+        assignRole(userId,roleId,role);
+        return jsonNode;
     }
 
     private List<JsonNode> getAssignedRolesOfUser(String userId){
@@ -228,5 +227,34 @@ public class KeycloakUserService {
 
         return response;
 
+    }
+
+    public JsonNode userSignin(SignInRequestDto signInRequestDto){
+        String url = keycloakBaseUrl + "/realms/" + realm + "/protocol/openid-connect/token";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+        requestBody.add("grant_type","password");
+        requestBody.add("client_id",clientId);
+        requestBody.add("client_secret",clientSecret);
+        requestBody.add("username",signInRequestDto.getUsername());
+        requestBody.add("password",signInRequestDto.getPassword());
+
+        GlobalApiResponse apiResponse = customApiCalls.makePostRequest(url,requestBody,headers);
+
+        if(!apiResponse.isStatus()){
+            log.info("Signin api fails. ");
+            throw new RuntimeException("Signin api fails. ");
+        }
+
+        String responseString = apiResponse.getData().toString();;
+
+        JsonNode response;
+        try {
+            response = objectMapper.readTree(responseString);
+        }catch (JsonProcessingException e){
+            throw new RuntimeException("Json Process exception.");
+        }
+        return response;
     }
 }

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GlobalApiResponse {
+public class GlobalApiResponse extends BaseController{
     private Integer statusCode;
     private boolean status;
     private String message;
