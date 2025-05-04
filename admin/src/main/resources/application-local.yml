@@ -57,3 +57,4 @@ keycloak:
 
 other:
     env: local
+    authKey: smg

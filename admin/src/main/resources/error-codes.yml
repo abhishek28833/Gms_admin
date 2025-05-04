@@ -1,0 +1,10 @@
+error-codes:
+  default:
+    message: We are facing a technical issue. Please wait while we resolve it.
+    http-status: 500
+  RP-101:
+    message: Validation Error.
+    http-status: 400
+  RP-102:
+    message: Unauthorized
+    http-status: 401

@@ -1,4 +1,4 @@
-package com.admin.service;
+package com.admin.service.keycloak;
 
 import com.admin.controller.base.BaseController;
 import com.admin.controller.base.GlobalApiResponse;
@@ -8,6 +8,7 @@ import com.admin.utils.CustomApiCalls;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -17,12 +18,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.json.JSONArray;
+
 import java.util.*;
 
 @Slf4j
 @Service
-public class KeycloakUserService {
+public class KeycloakUserService implements KeycloakUserServiceInterface {
 
     @Value("${keycloak.baseUrl}")
     private String keycloakBaseUrl;
@@ -66,6 +67,7 @@ public class KeycloakUserService {
             requestBody.add("grant_type","client_credentials");
             requestBody.add("client_id",clientId);
             requestBody.add("client_secret",clientSecret);
+            requestBody.add("scope","openid profile email");
             GlobalApiResponse apiResponse = customApiCalls.makePostRequest(url,requestBody,headers);
             if(!apiResponse.isStatus()){
                 log.info("GetKeycloak token api fails. ");
@@ -151,7 +153,7 @@ public class KeycloakUserService {
         return jsonNode;
     }
 
-    private List<JsonNode> getAssignedRolesOfUser(String userId){
+    public List<JsonNode> getAssignedRolesOfUser(String userId){
         String url = keycloakBaseUrl + "/admin/realms/" + realm + "/users/" + userId + "/role-mapping/realm";
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(getKeyclockadminToken());
@@ -174,7 +176,7 @@ public class KeycloakUserService {
 
 
 
-    private String getRoleIdByName(String roleName){
+    public String getRoleIdByName(String roleName){
         String url = keycloakBaseUrl + "/admin/realms/" + realm + "/roles/" + roleName;
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(getKeyclockadminToken());
@@ -214,7 +216,7 @@ public class KeycloakUserService {
 
     }
 
-    private GlobalApiResponse getUserId(String userName) {
+    public GlobalApiResponse getUserId(String userName) {
         String url = keycloakBaseUrl + "/admin/realms/" + realm + "/users?username=" + userName + "&exact=true";
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(getKeyclockadminToken());
@@ -239,7 +241,7 @@ public class KeycloakUserService {
         requestBody.add("client_secret",clientSecret);
         requestBody.add("username",signInRequestDto.getUsername());
         requestBody.add("password",signInRequestDto.getPassword());
-
+        requestBody.add("scope","openid profile email");
         GlobalApiResponse apiResponse = customApiCalls.makePostRequest(url,requestBody,headers);
 
         if(!apiResponse.isStatus()){
@@ -256,5 +258,27 @@ public class KeycloakUserService {
             throw new RuntimeException("Json Process exception.");
         }
         return response;
+    }
+
+    public Object getUserInfoFromToken(String token) {
+        try{
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.set("Authorization", "Bearer " + token);
+            String baseUrl = keycloakBaseUrl + "/realms/" + realm + "/protocol/openid-connect/userinfo";
+            ResponseEntity responseEntity = restTemplate
+                    .exchange(baseUrl, HttpMethod.GET, new HttpEntity<>(httpHeaders), String.class);
+            JsonObject response = new Gson().fromJson(responseEntity.getBody().toString(), JsonObject.class);
+            log.info("Response : "+ response.toString());
+
+            if(response.has("error")){
+                return null;
+            }
+            return response;
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
     }
 }

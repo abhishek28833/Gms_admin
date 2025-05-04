@@ -7,14 +7,13 @@ import com.admin.model.dto.SignInRequestDto;
 import com.admin.model.dto.SignUpRequestDto;
 import com.admin.model.entity.CustomerDetailManager;
 import com.admin.repository.UserDetailRepo;
-import com.admin.service.KeycloakUserService;
+import com.admin.service.keycloak.KeycloakUserService;
+import com.admin.service.keycloak.KeycloakUserServiceInterface;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonObject;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.websocket.OnClose;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +31,7 @@ import java.util.Map;
 public class UserOnboarding {
 
     @Autowired
-    private final KeycloakUserService keycloakUserService;
+    private final KeycloakUserServiceInterface keycloakUserService;
     private UserDetailRepo userDetailRepo;
     private BaseController baseController;
     ObjectMapper objectMapper = new ObjectMapper();

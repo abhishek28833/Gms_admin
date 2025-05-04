@@ -37,3 +37,4 @@ logging:
 
 other:
   env: dev
+  authKey: smg
