@@ -8,3 +8,13 @@ error-codes:
   RP-102:
     message: Unauthorized
     http-status: 401
+  RP-103:
+    message: Uploaded file size is large
+    http-code: 500
+  RP-104:
+    message: unsupported media type
+    http-code: 500
+  RP-105:
+    message: File can't be null or empty.
+    http-code: 400
+

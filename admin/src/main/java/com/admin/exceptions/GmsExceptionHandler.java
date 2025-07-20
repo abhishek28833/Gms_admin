@@ -1,8 +1,10 @@
 package com.admin.exceptions;
 
+import lombok.Getter;
 
+@Getter
 public class GmsExceptionHandler extends RuntimeException{
-    String errorCode;
+    private final String errorCode;
 
     public GmsExceptionHandler(String message,String errorCode){
         super(message);
@@ -10,7 +12,10 @@ public class GmsExceptionHandler extends RuntimeException{
     }
 
     public GmsExceptionHandler(String errorCode){
+        super();
         this.errorCode = errorCode;
     }
+
+
 }
 

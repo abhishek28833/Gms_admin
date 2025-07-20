@@ -34,7 +34,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
 
         String[] authHeaderValue = authHeader.split(" ");
-        JsonObject userInfo = (JsonObject) keycloakUserServiceInterface.getUserInfoFromToken(authHeaderValue[1]);
+        JsonObject userInfo = (JsonObject) keycloakUserServiceInterface.getUserInfoFromToken(authHeaderValue[0]);
         if(userInfo != null){
             request.setAttribute("userId",userInfo.get("sub").getAsString());
             return true;
@@ -44,11 +44,11 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
     }
 
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-                            @Nullable ModelAndView modelAndView) throws Exception {
-        log.info("response checking " + response.toString());
-        log.info("faltu logging");
-    }
+//    @Override
+//    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+//                            @Nullable ModelAndView modelAndView) throws Exception {
+//        log.info("response checking " + response.toString());
+//        log.info("faltu logging");
+//    }
 
 }

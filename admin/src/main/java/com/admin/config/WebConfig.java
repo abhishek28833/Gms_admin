@@ -29,15 +29,28 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedHeaders("*");
     }
 
+    @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
         registry.addInterceptor(internalServiceInterceptor)
-                .addPathPatterns("/pako/**")
+                .addPathPatterns("/apok/**")
                 .excludePathPatterns("");
 
+//        registry.addInterceptor(authInterceptor)
+//                .excludePathPatterns("")
+//                .pathMatcher(new AntPathMatcher());
+
         registry.addInterceptor(authInterceptor)
-                .excludePathPatterns("")
-                .pathMatcher(new AntPathMatcher());
+                .addPathPatterns("/**") // apply to all paths
+                .excludePathPatterns(
+                        "/apok/**", // exclude internal APIs
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/login", // example: add other public endpoints here
+                        "/public/**"
+                )
+                .pathMatcher((new AntPathMatcher()));
+
     }
 
 }
