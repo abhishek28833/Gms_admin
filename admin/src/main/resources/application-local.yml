@@ -1,5 +1,5 @@
 server:
-    port: 8080
+    port: 8081
     error:
         include-message: always
         include-binding-errors: always
@@ -25,14 +25,14 @@ spring:
         sql-migration-prefix: V
         sql-migration-suffix: .sql
 
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    issuer-uri: http://localhost:8080/realms/my-app-realm
     app:
         jwtExpirationMs: 30000
         jwtSecret: asndsnblskjnb123253266w423tw32tw4kvn4kdg4tll4
-
-#    security:
-#        user:
-#            password: gms@123
-#            name: admin
 
     mvc:
         pathmatch:
@@ -46,14 +46,14 @@ logging:
             flywaydb: DEBUG
 
 keycloak:
-    baseUrl: http://localhost:8090
-    realm: gms
-    client_id: gms_client
+    baseUrl: http://localhost:8080
+    realm: my-app-realm
+    client_id: my-backend-service
     client_secret: v5j6U6Kfhwcw4gazRr0xo5oVCaf7QSB2
     client_uuid: 1817f53d-c79d-4280-a2d1-4d4d8d764646
     roles:
-        user: user
-        owner: owner
+        user: USER
+        owner: ADMIN
 
 other:
     env: local

@@ -10,47 +10,43 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-@EnableWebMvc
+//@EnableWebMvc
 public class WebConfig implements WebMvcConfigurer {
 
-    private final InternalServiceInterceptor internalServiceInterceptor;
-    private final AuthInterceptor authInterceptor;
+//    private final InternalServiceInterceptor internalServiceInterceptor;
+//    private final AuthInterceptor authInterceptor;
 
-    public WebConfig(InternalServiceInterceptor internalServiceInterceptor, AuthInterceptor authInterceptor) {
-        this.internalServiceInterceptor = internalServiceInterceptor;
-        this.authInterceptor = authInterceptor;
-    }
-
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("*")
-                .allowedMethods("*")
-                .allowedHeaders("*");
-    }
-
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-
-        registry.addInterceptor(internalServiceInterceptor)
-                .addPathPatterns("/apok/**")
-                .excludePathPatterns("");
-
+//    public WebConfig(InternalServiceInterceptor internalServiceInterceptor, AuthInterceptor authInterceptor) {
+//        this.internalServiceInterceptor = internalServiceInterceptor;
+//        this.authInterceptor = authInterceptor;
+//    }
+//
+//    @Override
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry.addMapping("/**")
+//                .allowedOrigins("*")
+//                .allowedMethods("*")
+//                .allowedHeaders("*");
+//    }
+//
+//    @Override
+//    public void addInterceptors(InterceptorRegistry registry) {
+//
+//        registry.addInterceptor(internalServiceInterceptor)
+//                .addPathPatterns("/apok/**")
+//                .excludePathPatterns("");
+//
 //        registry.addInterceptor(authInterceptor)
-//                .excludePathPatterns("")
-//                .pathMatcher(new AntPathMatcher());
-
-        registry.addInterceptor(authInterceptor)
-                .addPathPatterns("/**") // apply to all paths
-                .excludePathPatterns(
-                        "/apok/**", // exclude internal APIs
-                        "/swagger-ui/**",
-                        "/v3/api-docs/**",
-                        "/login", // example: add other public endpoints here
-                        "/public/**"
-                )
-                .pathMatcher((new AntPathMatcher()));
-
-    }
+//                .addPathPatterns("/**") // apply to all paths
+//                .excludePathPatterns(
+//                        "/apok/**", // exclude internal APIs
+//                        "/swagger-ui/**",
+//                        "/v3/api-docs/**",
+//                        "/login", // example: add other public endpoints here
+//                        "/public/**"
+//                )
+//                .pathMatcher((new AntPathMatcher()));
+//
+//    }
 
 }

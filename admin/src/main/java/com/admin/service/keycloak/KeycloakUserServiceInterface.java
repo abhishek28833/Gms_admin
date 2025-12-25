@@ -3,6 +3,7 @@ package com.admin.service.keycloak;
 import com.admin.controller.base.GlobalApiResponse;
 import com.admin.model.dto.SignInRequestDto;
 import com.admin.model.dto.SignUpRequestDto;
+import com.admin.model.response.KeycloakTokenResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -21,5 +22,9 @@ public interface KeycloakUserServiceInterface {
     public JsonNode userSignin(SignInRequestDto signInRequestDto);
 
     public Object getUserInfoFromToken(String token);
+
+    public KeycloakTokenResponse refreshToken(String refreshToken);
+
+    public void logout(String refreshToken);
 
 }

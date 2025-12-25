@@ -4,6 +4,7 @@ import com.admin.controller.base.BaseController;
 import com.admin.controller.base.GlobalApiResponse;
 import com.admin.model.dto.SignInRequestDto;
 import com.admin.model.dto.SignUpRequestDto;
+import com.admin.model.response.KeycloakTokenResponse;
 import com.admin.utils.CustomApiCalls;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.*;
 
@@ -50,12 +52,13 @@ public class KeycloakUserService implements KeycloakUserServiceInterface {
     private final CustomApiCalls customApiCalls;
     private BaseController baseController;
     private GlobalApiResponse res;
+    ObjectMapper objectMapper = new ObjectMapper();
 
-    public KeycloakUserService(CustomApiCalls customApiCalls,BaseController baseController) {
+    public KeycloakUserService(CustomApiCalls customApiCalls, BaseController baseController , WebClient.Builder webClientBuilder) {
         this.customApiCalls = customApiCalls;
         this.baseController = baseController;
     }
-    ObjectMapper objectMapper = new ObjectMapper();
+
 
     private String getKeyclockadminToken(){
         try{
@@ -238,10 +241,10 @@ public class KeycloakUserService implements KeycloakUserServiceInterface {
         MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
         requestBody.add("grant_type","password");
         requestBody.add("client_id",clientId);
-        requestBody.add("client_secret",clientSecret);
+//        requestBody.add("client_secret",clientSecret);
         requestBody.add("username",signInRequestDto.getUsername());
         requestBody.add("password",signInRequestDto.getPassword());
-        requestBody.add("scope","openid profile email");
+//        requestBody.add("scope","openid profile email");
         GlobalApiResponse apiResponse = customApiCalls.makePostRequest(url,requestBody,headers);
 
         if(!apiResponse.isStatus()){
@@ -280,5 +283,91 @@ public class KeycloakUserService implements KeycloakUserServiceInterface {
         {
             return null;
         }
+    }
+
+
+    public KeycloakTokenResponse login(String username, String password) {
+
+        try {
+            String url = keycloakBaseUrl + "/realms/" + realm + "/protocol/openid-connect/token";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+            requestBody.add("grant_type","password");
+            requestBody.add("client_id",clientId);
+            requestBody.add("username",username);
+            requestBody.add("password",password);
+//        requestBody.add("client_secret",clientSecret);
+//        requestBody.add("scope","openid profile email");
+            GlobalApiResponse apiResponse = customApiCalls.makePostRequest(url,requestBody,headers);
+            if(!apiResponse.isStatus()){
+                log.info("GetKeycloak token api fails. ");
+                throw new RuntimeException("GetKeycloak token api fails. ");
+            }
+
+            String responseString = apiResponse.getData().toString();
+            JsonNode accessToken = objectMapper.readTree(responseString);
+            return objectMapper.convertValue(accessToken, KeycloakTokenResponse.class);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public KeycloakTokenResponse refreshToken(String refreshToken) {
+        String tokenUrl = keycloakBaseUrl + "/realms/" + realm + "/protocol/openid-connect/token";
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "refresh_token");
+        body.add("client_id", clientId);
+        body.add("refresh_token", refreshToken);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
+
+        GlobalApiResponse apiResponse = customApiCalls.makePostRequest(tokenUrl,body,headers);
+        if(!apiResponse.isStatus()){
+            log.info("GetKeycloak token from refresh token api fails. ");
+            throw new RuntimeException("GetKeycloak token from refresh token api fails. ");
+        }
+
+        String responseString = apiResponse.getData().toString();;
+
+        JsonNode tokenData;
+        try {
+            tokenData = objectMapper.readTree(responseString);
+        }catch (JsonProcessingException e){
+            throw new RuntimeException("Json Process exception.");
+        }
+
+        if (tokenData.has("error")) {
+            String errorMessage = tokenData.has("error_description") ? tokenData.get("error_description").asText() : "Refresh token failed";
+            throw new RuntimeException(errorMessage);
+        }
+        KeycloakTokenResponse response = objectMapper.convertValue(tokenData, KeycloakTokenResponse.class);
+        log.info("response for refreshToke " + response);
+        return response;
+    }
+
+    public void logout(String refreshToken) {
+
+        String logoutUrl = keycloakBaseUrl + "/realms/" + realm + "/protocol/openid-connect/logout";
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("client_id", clientId);
+        body.add("refresh_token", refreshToken);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        GlobalApiResponse apiResponse = customApiCalls.makePostRequest(logoutUrl,body,headers);
+        if(!apiResponse.isStatus()){
+            log.info("logout api fails. ");
+            throw new RuntimeException("Logout api fails. ");
+        }
+
     }
 }
