@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  admin-service:
+    container_name: admin-service
+    build:
+      context: .
+    env_file:
+      - .env
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+    networks:
+      - keycloak-net
+
+networks:
+  keycloak-net:
+    external: true
