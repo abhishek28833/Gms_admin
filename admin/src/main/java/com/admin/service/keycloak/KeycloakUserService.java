@@ -235,6 +235,7 @@ public class KeycloakUserService implements KeycloakUserServiceInterface {
     }
 
     public JsonNode userSignin(SignInRequestDto signInRequestDto){
+        log.info("**************************** Inside the User Login service ****************************");
         String url = keycloakBaseUrl + "/realms/" + realm + "/protocol/openid-connect/token";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
