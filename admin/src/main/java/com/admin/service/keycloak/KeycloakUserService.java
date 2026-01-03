@@ -245,6 +245,7 @@ public class KeycloakUserService implements KeycloakUserServiceInterface {
         requestBody.add("username",signInRequestDto.getUsername());
         requestBody.add("password",signInRequestDto.getPassword());
 //        requestBody.add("scope","openid profile email");
+        log.info("Going To hit API POST Url: " + url + " Headers: " + headers + " Body : " + requestBody);
         GlobalApiResponse apiResponse = customApiCalls.makePostRequest(url,requestBody,headers);
 
         if(!apiResponse.isStatus()){

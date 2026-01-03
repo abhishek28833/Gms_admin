@@ -1,5 +1,5 @@
 server:
-  port: ${PORT:8081}
+  port: ${PORT}
   error:
     include-message: always
     include-binding-errors: always
@@ -30,7 +30,7 @@ spring:
   security:
     oauth2:
       resourceserver:
-        jwt:
+       jwt:
           issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI}
   app:
     jwtExpirationMs: 30000
