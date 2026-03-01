@@ -1,4 +1,4 @@
-package com.admin.controller;
+package com.admin.controller.AuthController;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +12,6 @@ public class AdminController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/dashboard")
     public String adminApi() {
-        String val = "fghjkljhbv";
         return "Admin access granted";
     }
 }

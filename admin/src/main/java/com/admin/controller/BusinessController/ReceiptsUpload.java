@@ -1,9 +1,8 @@
-package com.admin.controller;
+package com.admin.controller.BusinessController;
 
-import com.admin.controller.base.GlobalApiResponse;
 import com.admin.model.dto.AddProductDto;
 import com.admin.model.entity.UserProductDetails;
-import com.admin.service.AddProductService;
+import com.admin.service.BusinessService.AddProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

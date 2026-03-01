@@ -1,17 +1,21 @@
-package com.admin.controller;
+package com.admin.controller.AuthController;
 
 
 import com.admin.controller.base.BaseController;
 import com.admin.controller.base.GlobalApiResponse;
-import com.admin.model.dto.LogoutRequestDto;
-import com.admin.model.dto.RefreshTokenRequestDto;
 import com.admin.model.dto.SignInRequestDto;
 import com.admin.model.dto.SignUpRequestDto;
+import com.admin.model.dto.SignupCache;
+import com.admin.model.dto.VerifyOtpRequest;
 import com.admin.model.entity.CustomerDetailManager;
 import com.admin.model.response.KeycloakTokenResponse;
 import com.admin.repository.UserDetailRepo;
 import com.admin.service.keycloak.KeycloakUserService;
 import com.admin.service.keycloak.KeycloakUserServiceInterface;
+import com.admin.service.otp.OtpService;
+import com.admin.service.otp.OtpVerificationService;
+import com.admin.utils.RedisKeys;
+import com.admin.utils.RedisService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,56 +29,58 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
 public class UserOnboarding {
 
-    @Autowired
-    private KeycloakUserServiceInterface keycloakUserService;
-    private UserDetailRepo userDetailRepo;
-    private BaseController baseController;
+    private final KeycloakUserServiceInterface keycloakUserService;
+    private final UserDetailRepo userDetailRepo;
+    private final BaseController baseController;
+    private final RedisService redisService;
+    private final OtpService otpService;
+    private final OtpVerificationService otpVerificationService;
+
     ObjectMapper objectMapper = new ObjectMapper();
 
-    public UserOnboarding(KeycloakUserService keycloakUserService,UserDetailRepo userDetailRepo,BaseController baseController) {
+    public UserOnboarding(KeycloakUserService keycloakUserService, UserDetailRepo userDetailRepo, BaseController baseController, RedisService redisService, OtpService otpService, OtpVerificationService otpVerificationService) {
         this.keycloakUserService = keycloakUserService;
         this.userDetailRepo = userDetailRepo;
         this.baseController = baseController;
+        this.redisService = redisService;
+        this.otpService = otpService;
+        this.otpVerificationService = otpVerificationService;
     }
 
 
-    @PostMapping("/signup")
-    public ResponseEntity<String> signup(@Valid @RequestBody SignUpRequestDto requestDto) {
-        try {
-            String role = "user";
-            JsonNode jsonNode = keycloakUserService.registerUser(requestDto,role);
+    @PostMapping("/signup/initiate")
+    public ResponseEntity<GlobalApiResponse> initiateSignup(@Valid @RequestBody SignUpRequestDto dto) {
 
-            if(jsonNode.has("error")){
-                String errorMessage = jsonNode.get("error").asText();
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error during signup: " + errorMessage);
-            }
-            String userId = jsonNode.get(0).get("id").asText();
-            JsonNode values = jsonNode.get(0);
-            CustomerDetailManager customerDetailManager = CustomerDetailManager.builder()
-                    .userId(userId)
-                    .firstName(requestDto.getFirstName())
-                    .lastName(requestDto.getLastName())
-                    .email(requestDto.getEmail())
-                    .username(requestDto.getUsername())
-                    .address(requestDto.getAddress())
-                    .roleType(1)
-                    .createdAt(LocalDateTime.now())
-                    .updatedAt(LocalDateTime.now())
-                    .build();
-            CustomerDetailManager res = userDetailRepo.save(customerDetailManager);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        return ResponseEntity.ok("User signup successfully");
+        SignupCache cache = SignupCache.builder()
+                .signupData(dto)
+                .emailVerified(false)
+                .phoneVerified(false)
+                .build();
+
+        redisService.set(
+                RedisKeys.signup(dto.getEmail()),
+                cache,
+                15
+        );
+
+        otpService.sendEmailOtp(dto.getEmail());
+        otpService.sendPhoneOtp(dto.getUsername());
+
+        return ResponseEntity.ok(
+                GlobalApiResponse.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .status(true)
+                        .message("OTP sent to email & phone")
+                        .data(null)
+                        .build()
+        );
     }
 
     @PostMapping("/login")
@@ -219,6 +225,22 @@ public class UserOnboarding {
                         .build()
         );
     }
+
+    @PostMapping("/signup/verify-otp")
+    public ResponseEntity<GlobalApiResponse> verifyOtp(@RequestBody VerifyOtpRequest request) {
+
+        otpVerificationService.verifyOtps(request);
+
+        return ResponseEntity.ok(
+                GlobalApiResponse.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .status(true)
+                        .message("OTP verified")
+                        .data(null)
+                        .build()
+        );
+    }
+
 
 
 }
