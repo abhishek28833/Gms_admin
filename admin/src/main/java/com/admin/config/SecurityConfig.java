@@ -28,7 +28,9 @@ public class SecurityConfig {
                                 "/auth/login",
                                 "/auth/refresh-token",
                                 "/auth/logout",
-                                "/health/check"
+                                "/health/check",
+                                "/auth/signup/initiate",
+                                "/auth/signup/verify-otp"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

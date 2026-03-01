@@ -3,6 +3,7 @@ server:
     error:
         include-message: always
         include-binding-errors: always
+    forward-headers-strategy: framework
 
 spring:
     datasource:
@@ -24,6 +25,11 @@ spring:
         out-of-order: true
         sql-migration-prefix: V
         sql-migration-suffix: .sql
+
+    redis:
+        host: localhost
+        port: 6379
+        timeout: 60000
 
     security:
         oauth2:
@@ -47,9 +53,9 @@ logging:
 
 keycloak:
     baseUrl: http://localhost:8080
-    realm: my-app-realm
+    realm: my-backend-realm
     client_id: my-backend-service
-    client_secret: v5j6U6Kfhwcw4gazRr0xo5oVCaf7QSB2
+    client_secret: ZLc0WTKR7umQYIIjpxPlPAnZ9S68vAOp
     client_uuid: 1817f53d-c79d-4280-a2d1-4d4d8d764646
     roles:
         user: USER

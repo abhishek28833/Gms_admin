@@ -23,8 +23,6 @@ public class SignUpRequestDto {
     private String firstName;
 
     private String lastName;
-    @Builder.Default
-    private Boolean emailVarified = false;
 
 
     @NotBlank(message = "Mobile number is required")
@@ -40,14 +38,7 @@ public class SignUpRequestDto {
     @NotBlank(message = "Address is required")
     private String address;
 
-    @Builder.Default
-    private String type = "password";
     @NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must be at least 8 characters long")
     private String password;
-    private Boolean temporary = false;
-    private Boolean enabled = true;
-
-    @Builder.Default
-    private long createdTimestamp = Instant.now().toEpochMilli();
 }
